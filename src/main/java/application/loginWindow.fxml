@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Pane prefHeight="500.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <ListView fx:id="listCursos" layoutX="50.0" layoutY="58.0" prefHeight="300.0" prefWidth="600.0" />
+            <Button fx:id="btnCrearCurs" layoutX="57.0" layoutY="406.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Crear curs" />
+            <Button fx:id="btnEliminarCurs" layoutX="523.0" layoutY="406.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Eliminar curs" />
+         </children></Pane>
+   </children>
+</AnchorPane>

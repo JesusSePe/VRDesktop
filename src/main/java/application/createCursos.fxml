@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Pane prefHeight="300.0" prefWidth="500.0">
+         <children>
+            <Label layoutX="59.0" layoutY="69.0" text="Títol:">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <Label layoutX="59.0" layoutY="167.0" text="Descripció:">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <TextField fx:id="inputTitol" layoutX="156.0" layoutY="65.0" prefHeight="25.0" prefWidth="290.0" />
+            <TextArea fx:id="taDescripcio" layoutX="156.0" layoutY="125.0" prefHeight="122.0" prefWidth="290.0" />
+            <Label layoutX="196.0" layoutY="26.0" text="Afegir curs">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

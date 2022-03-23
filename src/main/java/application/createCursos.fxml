@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="337.0" prefWidth="564.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.createCursosController">
+   <children>
+      <Pane prefHeight="337.0" prefWidth="564.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <Label layoutX="59.0" layoutY="80.0" text="Títol:">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <Label layoutX="59.0" layoutY="178.0" text="Descripció:">
+               <font>
+                  <Font name="Arial" size="12.0" />
+               </font>
+            </Label>
+            <TextField fx:id="inputTitol" layoutX="156.0" layoutY="76.0" prefHeight="25.0" prefWidth="290.0" />
+            <TextArea fx:id="taDescripcio" layoutX="156.0" layoutY="136.0" prefHeight="122.0" prefWidth="290.0" />
+            <Label layoutX="204.0" layoutY="24.0" text="Creació de curs">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+            <Button fx:id="btnCrearCurs" layoutX="247.0" layoutY="289.0" mnemonicParsing="false" text="Crear curs" />
+         </children>
+      </Pane>
+   </children>
+</AnchorPane>

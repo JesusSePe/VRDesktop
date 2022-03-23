@@ -1,17 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.text.*?>
 <?import javafx.scene.control.*?>
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="500.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="application.loginWindow_Controller">
    <children>
       <Pane prefHeight="500.0" prefWidth="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <ListView fx:id="listCursos" layoutX="50.0" layoutY="58.0" prefHeight="300.0" prefWidth="600.0" />
-            <Button fx:id="btnCrearCurs" layoutX="57.0" layoutY="406.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Crear curs" />
-            <Button fx:id="btnEliminarCurs" layoutX="523.0" layoutY="406.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Eliminar curs" />
+            <Button fx:id="btnCrearCurs" layoutX="57.0" layoutY="513.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Crear curs" />
+            <Label layoutX="57.0" layoutY="66.0" prefHeight="17.0" prefWidth="74.0" text="Cursos">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font></Label>
+            <Label layoutX="348.0" layoutY="71.0" text="Descripció">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+            <Label fx:id="lblDescr" layoutX="348.0" layoutY="127.0" text="-">
+               <font>
+                  <Font name="Arial" size="14.0" />
+               </font>
+            </Label>
+            <Label layoutX="348.0" layoutY="172.0" text="Usuaris">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+            <ListView fx:id="listUsuaris" layoutX="348.0" layoutY="215.0" prefHeight="318.0" prefWidth="170.0" />
+            <Label layoutX="665.0" layoutY="363.0" text="Alumnes curs">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+            <Label layoutX="665.0" layoutY="172.0" text="Professors curs">
+               <font>
+                  <Font name="Arial Black" size="18.0" />
+               </font>
+            </Label>
+            <ListView fx:id="listProfessorsCurs" layoutX="665.0" layoutY="217.0" prefHeight="132.0" prefWidth="170.0" />
+            <ListView fx:id="listAlumnesCurs" layoutX="665.0" layoutY="401.0" prefHeight="132.0" prefWidth="170.0" />
+            <GridPane fx:id="gridCursos" layoutX="57.0" layoutY="107.0" prefHeight="54.0" prefWidth="200.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+            </GridPane>
+            <Button fx:id="btnAfegirProf" layoutX="533.0" layoutY="248.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Afegir professor" />
+            <Button fx:id="btnEliminarProf" layoutX="533.0" layoutY="300.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="115.0" text="Eliminar professor" />
+            <Button fx:id="btnAfegirAlumne" layoutX="535.0" layoutY="424.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="110.0" text="Afegir alumne" />
+            <Button fx:id="btnEliminarAlumne" layoutX="535.0" layoutY="479.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="110.0" text="Eliminar alumne" />
          </children></Pane>
    </children>
 </AnchorPane>

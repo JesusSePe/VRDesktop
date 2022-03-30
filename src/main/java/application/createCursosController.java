@@ -100,7 +100,7 @@ public class createCursosController {
 
 		        	   System.out.println(test);
 		        	   collectionCourses.insertOne(test);
-		        	   logController.listCursos.refresh();
+//		        	   logController.listCursos.refresh();
 		        	   System.out.println("Creado");
 		           } catch (MongoException me) {
 		               System.err.println("An error occurred while attempting to run a command: " + me);

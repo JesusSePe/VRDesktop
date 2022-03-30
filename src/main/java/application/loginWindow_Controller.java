@@ -38,6 +38,9 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.model.Updates;
+import com.mongodb.client.result.UpdateResult;
 import com.sun.glass.events.MouseEvent;
 
 import application.model.Course;
@@ -80,166 +83,184 @@ public class loginWindow_Controller extends Application {
 	public static Stage principal;
 	static String uriString;
 	static String uri;
-	
+
 	static MongoDatabase database;
 
-    @FXML
-    private Button btnCrearCurs;
-    
-    @FXML
-    private GridPane gridCursos;
-    
-    @FXML
-    public ListView<String> listCursos;
-    
-    @FXML
-    private Label lblDescr;
-    
-    @FXML
-    private ListView<String> listProfessorsCurs;
+	@FXML
+	private Button btnCrearCurs;
 
-    @FXML
-    private ListView<String> listUsuaris;
+	@FXML
+	private GridPane gridCursos;
 
-    @FXML
-    private ListView<String> listAlumnesCurs;
-    
-    @FXML
-    private Button btnEliminarAlumne;
+	@FXML
+	public ListView<String> listCursos;
 
-    @FXML
-    private Button btnEliminarProf;
+	@FXML
+	private Label lblDescr;
 
-    @FXML
-    private Button btnAfegirAlumne;
-    
-    @FXML
-    private Button btnAfegirProf;
+	@FXML
+	private ListView<String> listProfessorsCurs;
 
-    Label nDescripcion;
+	@FXML
+	private ListView<String> listUsuaris;
+
+	@FXML
+	private ListView<String> listAlumnesCurs;
+
+	@FXML
+	private Button btnEliminarAlumne;
+
+	@FXML
+	private Button btnEliminarProf;
+
+	@FXML
+	private Button btnAfegirAlumne;
+
+	@FXML
+	private Button btnAfegirProf;
+
+	Label nDescripcion;
 	Label nTitulo;
 	static Label lTitulo;	
 	AnchorPane ap;
 	static Button btnElimi;
-	
 
 	static MongoCollection<Document> collectionCourses;
 	static MongoCollection<Document> collectionUsers;
 	FindIterable<Document> iterDoc;
 	MongoCursor<Document> cursor;
-    
-    private final List<String> listIds = FXCollections.observableArrayList();
-    
+
+	private final List<String> listIds = FXCollections.observableArrayList();
+
 	private ObservableList<Course> courseData = FXCollections.observableArrayList();
 	ArrayList<String> arrayTitulo = new ArrayList<String>();
 	static ArrayList<ObjectId> arrayId = new ArrayList<ObjectId>();
 	ArrayList<String> arrayDescripcion = new ArrayList<String>();
 	ArrayList<JsonObject> array = new ArrayList<JsonObject>();
+	ArrayList <String> intTeac = new ArrayList<String>();
+
 
 
 	@FXML
-    public void initialize() throws ParseException {
-		
+	public void initialize() throws ParseException {
+
 		try (MongoClient mongoClient = MongoClients.create(uri)) {
-            database = mongoClient.getDatabase("ClassVRroom");
-           try {
-               Bson command = new BsonDocument("ping", new BsonInt64(1));
-               Document commandResult = database.runCommand(command);
-               System.out.println("Connected successfully to server.");
-			    
-			    JSONParser parser = new JSONParser();
-			    
-			    
-			    //COLLECTION COURSES//
-	            collectionCourses = database.getCollection("courses");
-	            iterDoc = collectionCourses.find();
+			database = mongoClient.getDatabase("ClassVRroom");
+			try {
+				Bson command = new BsonDocument("ping", new BsonInt64(1));
+				Document commandResult = database.runCommand(command);
+				System.out.println("Connected successfully to server.");
+
+				JSONParser parser = new JSONParser();
+
+
+				//COLLECTION COURSES//
+				collectionCourses = database.getCollection("courses");
+				iterDoc = collectionCourses.find();
 				cursor = collectionCourses.find().iterator();
 				while (cursor.hasNext()) {
-			         Document stringCursor = cursor.next();
-			    }
-				Label lTitulo = null;
-			    FindIterable<Document> f = collectionCourses.find();
-			    int x = 0;
-			    for(Document doc : f) {
-			    	String title = (String) doc.get("title");
-			    	ObjectId _id = (ObjectId) doc.get("_id");
-			    	String descrp = (String) doc.get("description");
-//			    	Array tecahers = (Array) doc.get("subscribers");
-//			    	DBObject query = (DBObject) QueryBuilder.start().put("subscribers").is("teachers");
-//			        System.out.println(collectionCourses.find());
-				    
-		            	lTitulo = new Label();
-		            	lTitulo.setText(title);
-		            	
-		            	gridCursos.add(lTitulo, 0, x);
-		        		btnElimi = new Button("X");
-		            	gridCursos.add(btnElimi, 2, x);
-		            	
-		            	btnElimi.setId(_id.toString());
-						lTitulo.setId(_id.toString());
-		            	
-		            	System.out.println(btnElimi.getId());
-		            	
-		            	btnElimi.setOnAction(new EventHandler<ActionEvent>() {
-		            		 public void handle(ActionEvent event) {
-		            			 deleteCourse();
-		            		 }
-						});
+					Document stringCursor = cursor.next();
+				}
+				FindIterable<Document> f = collectionCourses.find();
+				int x = 0;
+				for(Document doc : f) {
+					String title = (String) doc.get("title");
+					ObjectId _id = (ObjectId) doc.get("_id");
+					String descrp = (String) doc.get("description");
+					Document subscribers = (Document) doc.get("subscribers");
+					ArrayList <String> subTeachers = (ArrayList<String>) subscribers.get("teachers");
+					ArrayList <String> subStudents = (ArrayList<String>) subscribers.get("students");
+					ObservableList <String> subS = FXCollections.observableArrayList();
+					ObservableList <String> subT = FXCollections.observableArrayList();
+					subT.addAll(subTeachers);
+					subS.addAll(subStudents);
 
-		            	lTitulo.setOnMouseClicked(event -> {
-		            		lblDescr.setText(doc.get("description").toString());
-		            	});
- 	
-		    		x++;
-			    }
 
-			    //COLLECTION USERS//
-			    collectionUsers = database.getCollection("users");
-			    FindIterable<Document> fu = collectionUsers.find();
+					lTitulo = new Label();
+					lTitulo.setText(title);
+
+					gridCursos.add(lTitulo, 0, x);
+					btnElimi = new Button("X");
+					gridCursos.add(btnElimi, 2, x);
+
+					btnElimi.setId(_id.toString());
+					lTitulo.setId(_id.toString());
+
+
+					btnElimi.setOnAction(new EventHandler<ActionEvent>() {
+						public void handle(ActionEvent event) {
+							deleteCourse();
+						}
+					});
+
+					lTitulo.setOnMouseClicked(event -> {
+						lblDescr.setText(doc.get("description").toString());
+						listProfessorsCurs.setItems(subT);
+						listAlumnesCurs.setItems(subS);
+					});
+
+					btnEliminarAlumne.setOnAction(new EventHandler<ActionEvent>() {
+						public void handle(ActionEvent arg0) {
+//							collectionCourses.find(Filters.eq("ID", listAlumnesCurs.getSelectionModel().getSelectedItem()));
+							Document query = new Document().append("title", lTitulo.getText());
+//							System.out.println(listAlumnesCurs.getSelectionModel().getSelectedItem());
+//							Bson updates = Updates.pull("subscribers.students", listAlumnesCurs.getSelectionModel().getSelectedItem().toString());
+//							UpdateResult result = collectionCourses.updateOne(query, updates);
+						}
+					});
+
+					x++;
+				}
+
+				//COLLECTION USERS//
+				collectionUsers = database.getCollection("users");
+				FindIterable<Document> fu = collectionUsers.find();
 				MongoCursor<Document> cursorUsers = collectionUsers.find().iterator();
-				
-				
+
+
 				Gson gson = new Gson();
-				
-			    for(Document docU : fu) {
-			    	String usersName = (String) docU.get("first_name");
-			    	Integer idUser = (Integer) docU.get("ID");
-			    	
-			    	listUsuaris.getItems().addAll(usersName);
-			    	
 
-			    	String docJ = docU.toJson();
-	                array.add((JsonObject) new JsonParser().parse(docJ));
-//	                System.out.println(array);
+				for(Document docU : fu) {
+					String usersName = (String) docU.get("first_name");
+					Integer idUser = (Integer) docU.get("ID");
 
-	                
-	            	btnAfegirProf.setOnAction(new EventHandler<ActionEvent>() {
+					listUsuaris.getItems().addAll(idUser.toString());
+
+
+					String docJ = docU.toJson();
+					array.add((JsonObject) new JsonParser().parse(docJ));
+					//	                System.out.println(array);
+
+
+					btnAfegirProf.setOnAction(new EventHandler<ActionEvent>() {
 						public void handle(ActionEvent arg0) {
 							listProfessorsCurs.getItems().addAll(listUsuaris.getSelectionModel().getSelectedItem());
 						}
 					});
 
-			    }
 
 
-           } catch (MongoException me) {
-               System.err.println("An error occurred while attempting to run a command: " + me);
-           }
-       }
-		
+				}
+
+
+			} catch (MongoException me) {
+				System.err.println("An error occurred while attempting to run a command: " + me);
+			}
+		}
+
 		btnCrearCurs.addEventHandler(ActionEvent.ACTION, new EventHandler<Event>() {
 			public void handle(Event arg0) {	
 				try {
-					
+
 					FXMLLoader fxmlLoader = new FXMLLoader();
-			         fxmlLoader.setLocation(loginWindow_Controller.class.getResource("createCursos.fxml"));
-			         ap = fxmlLoader.load();
-			         Scene scene = new Scene(ap, 600, 400);
-			         Stage stage = new Stage();
-			         stage.setScene(scene);
-			         
-			         createCursosController cc = fxmlLoader.getController();
-			         stage.show();
+					fxmlLoader.setLocation(loginWindow_Controller.class.getResource("createCursos.fxml"));
+					ap = fxmlLoader.load();
+					Scene scene = new Scene(ap, 600, 400);
+					Stage stage = new Stage();
+					stage.setScene(scene);
+
+					createCursosController cc = fxmlLoader.getController();
+					stage.show();
 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -247,90 +268,130 @@ public class loginWindow_Controller extends Application {
 				}
 			}
 		});
-	
+
 	}
-		
+
 	public void start(Stage primaryStage) throws IOException, ParseException {
-			
-			//////////URI text file//////////
+
+		//////////URI text file//////////
 		File uriFile = new File("uri");
 		BufferedReader br = new BufferedReader(new FileReader(uriFile));
-			
+
 		while ((uriString = br.readLine()) != null) {
 			System.out.println(uriString);
 			uri = uriString;
 		}
-				
-			
+
+
 		//////////Window creation//////////	
 		try {
 			Parent root = FXMLLoader.load(getClass().getResource("loginWindow.fxml"));
 			Scene scene = new Scene(root);
-				
-				
+
+
 			primaryStage.setScene(scene);
 			primaryStage.setResizable(false);
-				
-				
+
+
 			principal = primaryStage;
-				
+
 			primaryStage.show();
-				
+
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+
+
 	}
-		
+
 	public static void setStage(Stage primaryStage) {
-	   	primaryStage = primaryStage;
-	 }
+		primaryStage = primaryStage;
+	}
 
 	public static void main(String[] args) throws IOException {
 		launch(args);
-		
+
 
 	}
-	
-	public static void addItemsToListView(ListView<JsonObject> list, ArrayList<JsonObject> array){
-        list.getItems().clear();
-        list.getItems().addAll(array);
-        list.setCellFactory(lv -> new ListCell<JsonObject>(){
-            @Override
-            public void updateItem(JsonObject array, boolean empty) {
-                super.updateItem(array, empty);
-                setText(empty ? null : array.get("first_name").toString());
-            }
-        });
-    }
-	
-	public static void deleteCourse() {
-        Alert a = new Alert(AlertType.CONFIRMATION,"You won't be able to recober the course. Do you want to keep going?");
-        Optional<ButtonType> result = a.showAndWait();
 
-        if(result.get() == ButtonType.OK) {
-            try (MongoClient mongoClient = MongoClients.create(uri)) {
-                database = mongoClient.getDatabase("ClassVRroom");
-               try {
-                   Bson command = new BsonDocument("ping", new BsonInt64(1));
-                   Document commandResult = database.runCommand(command);                
-                   JSONParser parser = new JSONParser();
-                    
-                    collectionCourses = database.getCollection("courses");
-                    collectionCourses.deleteOne(Filters.eq("_id", new ObjectId(btnElimi.getId())));
-                    Alert b = new Alert(AlertType.INFORMATION,"The course was deleted successfully");
-                    b.showAndWait();
-               } catch (MongoException me) {
-                   System.err.println("An error occurred while attempting to run a command: " + me);
-               }
-           }
-        }else {
-            Alert b = new Alert(AlertType.INFORMATION,"Nothing was deleted");
-            b.showAndWait();
-        }
-        
-    }
-	
+	public static void addItemsToListView(ListView<JsonObject> list, ArrayList<JsonObject> array){
+		list.getItems().clear();
+		list.getItems().addAll(array);
+		list.setCellFactory(lv -> new ListCell<JsonObject>(){
+			@Override
+			public void updateItem(JsonObject array, boolean empty) {
+				super.updateItem(array, empty);
+				setText(empty ? null : array.get("first_name").toString());
+			}
+		});
+	}
+
+	public static void deleteCourse() {
+		Alert a = new Alert(AlertType.CONFIRMATION,"You won't be able to recober the course. Do you want to keep going?");
+		Optional<ButtonType> result = a.showAndWait();
+
+		if(result.get() == ButtonType.OK) {
+			try (MongoClient mongoClient = MongoClients.create(uri)) {
+				database = mongoClient.getDatabase("ClassVRroom");
+				try {
+					Bson command = new BsonDocument("ping", new BsonInt64(1));
+					Document commandResult = database.runCommand(command);                
+					JSONParser parser = new JSONParser();
+
+					collectionCourses = database.getCollection("courses");
+					collectionCourses.deleteOne(Filters.eq("_id", new ObjectId(btnElimi.getId())));
+					Alert b = new Alert(AlertType.INFORMATION,"The course was deleted successfully");
+					b.showAndWait();
+				} catch (MongoException me) {
+					System.err.println("An error occurred while attempting to run a command: " + me);
+				}
+			}
+		}else {
+			Alert b = new Alert(AlertType.INFORMATION,"Nothing was deleted");
+			b.showAndWait();
+		}
+
+	}
+
+	//	public void deleteTeacher(String course, int teacher) {
+	//
+	//        try (MongoClient mongoClient = MongoClients.create(DOTENV.get("DB_URI"))) {
+	//            System.out.println("Connexion creada correctamente");
+	//            db = mongoClient.getDatabase("vrclassroom");
+	//            MongoCollection<Document> collection = db.getCollection("courses");
+	//
+	//            Document query = new Document().append("title", course);
+	//            Bson updates = Updates.pull("subscribers.teachers", teacher);
+	//            UpdateOptions options = new UpdateOptions().upsert(true);
+	//            try {
+	//                UpdateResult result = collection.updateOne(query, updates, options);
+	//                System.out.println("Modified document count: " + result.getModifiedCount());
+	//                System.out.println("Upserted id: " + result.getUpsertedId()); // only contains a value when an upsert is performed
+	//            } catch (MongoException me) {
+	//                System.err.println("Unable to update due to an error: " + me);
+	//            }
+	//        }
+	//    }
+
+	public void deleteUser(String course, int teacher) {
+		try (MongoClient mongoClient = MongoClients.create(uri)) {
+			database = mongoClient.getDatabase("ClassVRroom");
+			try {
+				Bson command = new BsonDocument("ping", new BsonInt64(1));
+				Document commandResult = database.runCommand(command);                
+				JSONParser parser = new JSONParser();
+				collectionCourses = database.getCollection("courses");
+
+				Document query = new Document().append("title", course);
+				Bson updates = Updates.pull("subscribers.teachers", teacher);
+				UpdateOptions options = new UpdateOptions().upsert(true);
+				UpdateResult result = collectionCourses.updateOne(query, updates, options);
+
+
+			} catch (MongoException me) {
+				System.err.println("An error occurred while attempting to run a command: " + me);
+			}
+		}
+	}
 }
 

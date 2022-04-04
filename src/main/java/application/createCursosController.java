@@ -42,14 +42,23 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.util.JSON;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import application.loginWindow_Controller;
+
 public class createCursosController {
+	
+		public Stage primaryStage;
+		public static Stage principal;
+	    AnchorPane ap;
 	
 		@FXML
 	    private TextArea taDescripcio;
@@ -72,7 +81,7 @@ public class createCursosController {
 			
 			
 		}
-		public void isClicked() {
+		public void isClicked() throws Exception {
 			if(!inputTitol.getText().isBlank() && !taDescripcio.getText().isBlank()) {
 				//JSON parser object to parse read file
 		        JSONParser jsonParser = new JSONParser();
@@ -95,13 +104,27 @@ public class createCursosController {
 		            collectionCourses = database.getCollection("courses");
 		           try {
 		        	   Document test = Document.parse(String.valueOf(obj));
-		        	   test.put("title",inputTitol.getText() );
+		        	   test.put("title",inputTitol.getText());
 		        	   test.put("description",taDescripcio.getText() );
 
 		        	   System.out.println(test);
 		        	   collectionCourses.insertOne(test);
-		        	   logController.listCursos.refresh();
 		        	   System.out.println("Creado");
+		        	   
+		        	   
+		        	   FXMLLoader fxmlLoader = new FXMLLoader();
+		        	   Parent root = FXMLLoader.load(getClass().getResource("loginWindow.fxml"));
+
+		  	           Scene scene = new Scene(root);
+		  	           Stage stage = new Stage();
+		  	           stage.setScene(scene);
+		  	           
+		  	           
+		  	         
+		  	           loginWindow_Controller rc = fxmlLoader.getController();
+		  	           stage.show();
+		        	   
+		        	   
 		           } catch (MongoException me) {
 		               System.err.println("An error occurred while attempting to run a command: " + me);
 		           }
@@ -117,5 +140,6 @@ public class createCursosController {
 			}
 	        
 	    }
+		
 
 }

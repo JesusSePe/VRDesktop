@@ -78,7 +78,6 @@ import javafx.stage.Stage;
 public class loginWindow_Controller extends Application {
 
 	public Stage primaryStage;
-	private Pane rootLayout;
 
 	public static Stage principal;
 	static String uriString;
@@ -123,7 +122,7 @@ public class loginWindow_Controller extends Application {
 	Label nTitulo;
 	static Label lTitulo;	
 	AnchorPane ap;
-	static Button btnElimi;
+	//static Button btnElimi;
 
 	static MongoCollection<Document> collectionCourses;
 	static MongoCollection<Document> collectionUsers;
@@ -143,7 +142,7 @@ public class loginWindow_Controller extends Application {
 
 	@FXML
 	public void initialize() throws ParseException, IOException {
-		
+
 
 		try (MongoClient mongoClient = MongoClients.create(uri)) {
 			database = mongoClient.getDatabase("ClassVRroom");
@@ -181,20 +180,18 @@ public class loginWindow_Controller extends Application {
 					lTitulo.setText(title);
 
 					gridCursos.add(lTitulo, 0, x);
-					btnElimi = new Button("X");
+					Button btnElimi = new Button("X");
 					gridCursos.add(btnElimi, 2, x);
 
 					btnElimi.setId(_id.toString());
 					lTitulo.setId(_id.toString());
-					
-					System.out.println(btnElimi.getId());
-					System.out.println(lTitulo.getId());
+
 
 					btnElimi.setOnAction(new EventHandler<ActionEvent>() {
 						public void handle(ActionEvent event) {
-							deleteCourse();
-							btnElimi.setVisible(false);
-							if(btnElimi.getId().equals(lTitulo.getId())) {
+							deleteCourse(btnElimi.getId());
+							if (btnElimi.getId().equals(lTitulo.getId())) {
+								btnElimi.setVisible(false);
 								lTitulo.setVisible(false);
 							}
 						}
@@ -208,11 +205,11 @@ public class loginWindow_Controller extends Application {
 
 					btnEliminarAlumne.setOnAction(new EventHandler<ActionEvent>() {
 						public void handle(ActionEvent arg0) {
-//							collectionCourses.find(Filters.eq("ID", listAlumnesCurs.getSelectionModel().getSelectedItem()));
+							//collectionCourses.find(Filters.eq("ID", listAlumnesCurs.getSelectionModel().getSelectedItem()));
 							Document query = new Document().append("title", lTitulo.getText());
 							System.out.println(listAlumnesCurs.getSelectionModel().getSelectedItem());
-//							Bson updates = Updates.pull("subscribers.students", listAlumnesCurs.getSelectionModel().getSelectedItem().toString());
-//							UpdateResult result = collectionCourses.updateOne(query, updates);
+							//Bson updates = Updates.pull("subscribers.students", listAlumnesCurs.getSelectionModel().getSelectedItem().toString());
+							//UpdateResult result = collectionCourses.updateOne(query, updates);
 						}
 					});
 
@@ -236,16 +233,12 @@ public class loginWindow_Controller extends Application {
 
 					String docJ = docU.toJson();
 					array.add((JsonObject) new JsonParser().parse(docJ));
-					//	                System.out.println(array);
-
 
 					btnAfegirProf.setOnAction(new EventHandler<ActionEvent>() {
 						public void handle(ActionEvent arg0) {
 							listProfessorsCurs.getItems().addAll(listUsuaris.getSelectionModel().getSelectedItem());
 						}
 					});
-
-
 
 				}
 
@@ -258,17 +251,13 @@ public class loginWindow_Controller extends Application {
 		btnCrearCurs.addEventHandler(ActionEvent.ACTION, new EventHandler<Event>() {
 			public void handle(Event arg0) {
 				try {
+					Parent root = FXMLLoader.load(getClass().getResource("createCursos.fxml"));
+					Stage st = new Stage();
+					st.setScene(new Scene(root));
+					st.setResizable(false);
+					st.show();
 
-					FXMLLoader fxmlLoader = new FXMLLoader();
-					fxmlLoader.setLocation(loginWindow_Controller.class.getResource("createCursos.fxml"));
-					ap = fxmlLoader.load();
-					Scene scene = new Scene(ap, 600, 400);
-					Stage stage = new Stage();
-					stage.setScene(scene);
-
-					createCursosController cc = fxmlLoader.getController();
-					stage.show();
-					
+					((Node)(arg0.getSource())).getScene().getWindow().hide();
 
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -279,15 +268,10 @@ public class loginWindow_Controller extends Application {
 
 	}
 
-	
 
-	public static void setStage(Stage primaryStage) {
-		primaryStage = primaryStage;
-	}
 
 	public static void main(String[] args) throws IOException {
 		launch(args);
-
 
 	}
 
@@ -303,7 +287,7 @@ public class loginWindow_Controller extends Application {
 		});
 	}
 
-	public static void deleteCourse() {
+	public static void deleteCourse(String id) {
 		Alert a = new Alert(AlertType.CONFIRMATION,"S'eliminara el curs, estas segur?");
 		Optional<ButtonType> result = a.showAndWait();
 
@@ -315,10 +299,14 @@ public class loginWindow_Controller extends Application {
 					Document commandResult = database.runCommand(command);                
 					JSONParser parser = new JSONParser();
 
+
 					collectionCourses = database.getCollection("courses");
-					collectionCourses.deleteOne(Filters.eq("_id", new ObjectId(btnElimi.getId())));
+					collectionCourses.deleteOne(new Document("_id",  new ObjectId(id)));
+					//					collectionCourses.deleteOne(Filters.eq("_id", new ObjectId(id)));
 					Alert b = new Alert(AlertType.INFORMATION,"El curs s'ha eliminat correctament!");
 					b.showAndWait();
+
+
 				} catch (MongoException me) {
 					System.err.println("Hi ha hagut un error" + me);
 				}
@@ -330,25 +318,6 @@ public class loginWindow_Controller extends Application {
 
 	}
 
-	//	public void deleteTeacher(String course, int teacher) {
-	//
-	//        try (MongoClient mongoClient = MongoClients.create(DOTENV.get("DB_URI"))) {
-	//            System.out.println("Connexion creada correctamente");
-	//            db = mongoClient.getDatabase("vrclassroom");
-	//            MongoCollection<Document> collection = db.getCollection("courses");
-	//
-	//            Document query = new Document().append("title", course);
-	//            Bson updates = Updates.pull("subscribers.teachers", teacher);
-	//            UpdateOptions options = new UpdateOptions().upsert(true);
-	//            try {
-	//                UpdateResult result = collection.updateOne(query, updates, options);
-	//                System.out.println("Modified document count: " + result.getModifiedCount());
-	//                System.out.println("Upserted id: " + result.getUpsertedId()); // only contains a value when an upsert is performed
-	//            } catch (MongoException me) {
-	//                System.err.println("Unable to update due to an error: " + me);
-	//            }
-	//        }
-	//    }
 
 	public void deleteUser(String course, int teacher) {
 		try (MongoClient mongoClient = MongoClients.create(uri)) {
@@ -363,7 +332,7 @@ public class loginWindow_Controller extends Application {
 				Bson updates = Updates.pull("subscribers.teachers", teacher);
 				UpdateOptions options = new UpdateOptions().upsert(true);
 				UpdateResult result = collectionCourses.updateOne(query, updates, options);
-				
+
 
 			} catch (MongoException me) {
 				System.err.println("An error occurred while attempting to run a command: " + me);
@@ -374,34 +343,34 @@ public class loginWindow_Controller extends Application {
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-			//////////URI text file//////////
-			File uriFile = new File("uri");
-			BufferedReader br = new BufferedReader(new FileReader(uriFile));
+		//////////URI text file//////////
+		File uriFile = new File("uri");
+		BufferedReader br = new BufferedReader(new FileReader(uriFile));
 
-			while ((uriString = br.readLine()) != null) {
-				System.out.println(uriString);
-				uri = uriString;
-			}
-
-
-			//////////Window creation//////////	
-			try {
-				Parent root = FXMLLoader.load(getClass().getResource("loginWindow.fxml"));
-				Scene scene = new Scene(root);
-				
-
-				primaryStage.setScene(scene);
-				primaryStage.setResizable(false);
+		while ((uriString = br.readLine()) != null) {
+			System.out.println(uriString);
+			uri = uriString;
+		}
 
 
-				principal = primaryStage;
+		//////////Window creation//////////	
+		try {
+			Parent root = FXMLLoader.load(getClass().getResource("loginWindow.fxml"));
+			Scene scene = new Scene(root);
 
-				primaryStage.show();
 
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
-		
+			primaryStage.setScene(scene);
+			primaryStage.setResizable(false);
+
+
+			principal = primaryStage;
+
+			primaryStage.show();
+
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 

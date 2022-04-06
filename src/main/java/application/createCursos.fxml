@@ -27,7 +27,7 @@
                   <Font name="Arial Black" size="18.0" />
                </font>
             </Label>
-            <Button fx:id="btnCrearCurs" layoutX="247.0" layoutY="289.0" mnemonicParsing="false" onAction="#isClicked" text="Crear curs"/>
+            <Button fx:id="btnCrearCurs" layoutX="247.0" layoutY="289.0" mnemonicParsing="false" onAction="#clicked" text="Crear curs" />
          </children>
       </Pane>
    </children>

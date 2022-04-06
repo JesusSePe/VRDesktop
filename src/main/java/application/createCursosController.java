@@ -1,45 +1,19 @@
 package application;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.ResourceBundle;
-import java.util.Set;
 
-import javax.print.DocFlavor.URL;
-
-import org.bson.BsonDocument;
-import org.bson.BsonInt64;
 import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.stream.JsonReader;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import com.mongodb.util.JSON;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -52,12 +26,11 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import application.loginWindow_Controller;
 
 public class createCursosController extends Application {
 
@@ -83,34 +56,33 @@ public class createCursosController extends Application {
 
 	private Object obj;
 
-	//	public static void setStage(Stage primaryStage) {
-	//		primaryStage = primaryStage;
-	//	}
+	// public static void setStage(Stage primaryStage) {
+	// primaryStage = primaryStage;
+	// }
 
-	//		public void start(Stage primaryStage) throws IOException, ParseException {
-	//			
-	//		    Parent root = FXMLLoader.load(getClass().getResource("createCursos.fxml"));
-	//		    Scene scene = new Scene(root);
-	//		    primaryStage.setScene(scene);
-	//		    principal = primaryStage;
-	//		    primaryStage.show();
-	//			
-	//		}
+	// public void start(Stage primaryStage) throws IOException, ParseException {
+	//
+	// Parent root = FXMLLoader.load(getClass().getResource("createCursos.fxml"));
+	// Scene scene = new Scene(root);
+	// primaryStage.setScene(scene);
+	// principal = primaryStage;
+	// primaryStage.show();
+	//
+	// }
 
 	@FXML
 	void initialize() throws Exception {
-		
-		try (MongoClient mongoClient = MongoClients.create("mongodb+srv://m001-student:m001-student@sandbox.qczb2.mongodb.net/ClassVRroom?authSource=admin&replicaSet=Sandbox-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")) {
+
+		try (MongoClient mongoClient = MongoClients.create(
+				"mongodb+srv://m001-student:m001-student@sandbox.qczb2.mongodb.net/ClassVRroom?authSource=admin&replicaSet=Sandbox-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")) {
 
 			database = mongoClient.getDatabase("ClassVRroom");
 			collectionCourses = database.getCollection("courses");
 
 			JSONParser jsonParser = new JSONParser();
-			try (FileReader reader = new FileReader("classVRroom_OneCourse.json"))
-			{
-				//Read JSON file
+			try (FileReader reader = new FileReader("classVRroom_OneCourse.json")) {
+				// Read JSON file
 				obj = jsonParser.parse(reader);
-
 
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -123,42 +95,42 @@ public class createCursosController extends Application {
 		} catch (MongoException me) {
 			System.err.println("An error occurred while attempting to run a command: " + me);
 		}
-		
+
 		btnCrearCurs.addEventHandler(ActionEvent.ACTION, new EventHandler<Event>() {
 			public void handle(Event arg0) {
-				((Node)(arg0.getSource())).getScene().getWindow().hide();
+				((Node) (arg0.getSource())).getScene().getWindow().hide();
 			}
 		});
 
 	}
 
 	public void clicked() {
-		try (MongoClient mongoClient = MongoClients.create("mongodb+srv://m001-student:m001-student@sandbox.qczb2.mongodb.net/ClassVRroom?authSource=admin&replicaSet=Sandbox-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")) {
+		try (MongoClient mongoClient = MongoClients.create(
+				"mongodb+srv://m001-student:m001-student@sandbox.qczb2.mongodb.net/ClassVRroom?authSource=admin&replicaSet=Sandbox-shard-0&readPreference=primary&appname=MongoDB%20Compass&ssl=true")) {
 
 			database = mongoClient.getDatabase("ClassVRroom");
 			collectionCourses = database.getCollection("courses");
 
 			JSONParser jsonParser = new JSONParser();
-			try (FileReader reader = new FileReader("classVRroom_OneCourse.json"))
-			{
-				//Read JSON file
+			try (FileReader reader = new FileReader("classVRroom_OneCourse.json")) {
+				// Read JSON file
 				obj = jsonParser.parse(reader);
-				
-				if(!inputTitol.getText().isBlank() && !taDescripcio.getText().isBlank()) {
-					//JSON parser object to parse read file
+
+				if (!inputTitol.getText().isEmpty() && !taDescripcio.getText().isEmpty()) {
+					// JSON parser object to parse read file
 
 					System.out.println("entra");
 
 					try {
 						Document test = Document.parse(String.valueOf(obj));
-						test.put("title",inputTitol.getText());
-						test.put("description",taDescripcio.getText() );
+						test.put("title", inputTitol.getText());
+						test.put("description", taDescripcio.getText());
 
 						System.out.println(test);
 						collectionCourses.insertOne(test);
 						System.out.println("Creado");
 
-						//((Node)(arg0.getSource())).getScene().getWindow().hide();
+						// ((Node)(arg0.getSource())).getScene().getWindow().hide();
 
 						FXMLLoader fxmlLoader = new FXMLLoader();
 						Parent root = FXMLLoader.load(getClass().getResource("loginWindow.fxml"));
@@ -170,15 +142,13 @@ public class createCursosController extends Application {
 						loginWindow_Controller rc = fxmlLoader.getController();
 						stage.show();
 
-
 					} catch (MongoException | IOException me) {
 					}
 
 				} else {
-					Alert a = new Alert(AlertType.WARNING,"Nothing can be left blank");
+					Alert a = new Alert(AlertType.WARNING, "Nothing can be left blank");
 					a.show();
 				}
-
 
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -191,11 +161,9 @@ public class createCursosController extends Application {
 		} catch (MongoException me) {
 			System.err.println("An error occurred while attempting to run a command: " + me);
 		}
-		
+
 //		btnCrearCurs.addEventHandler(ActionEvent.ACTION, new EventHandler<Event>() {
 //			public void handle(Event arg0) {
-
-				
 
 //			}
 //		});
@@ -210,7 +178,6 @@ public class createCursosController extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.setResizable(false);
 
-
 		principal = primaryStage;
 
 		primaryStage.show();
@@ -218,6 +185,5 @@ public class createCursosController extends Application {
 		System.out.println("hola");
 
 	}
-
 
 }

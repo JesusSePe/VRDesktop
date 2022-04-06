@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -145,13 +146,171 @@ public class loginWindow_Controller extends Application {
 					ObjectId _id = (ObjectId) doc.get("_id");
 					String descrp = (String) doc.get("description");
 					Document subscribers = (Document) doc.get("subscribers");
-					ArrayList<String> subTeachers = (ArrayList<String>) subscribers.get("teachers");
+					Object subTeachers = subscribers.get("teachers");
 					ArrayList<String> subStudents = (ArrayList<String>) subscribers.get("students");
 					ObservableList<String> subS = FXCollections.observableArrayList();
 					ObservableList<String> subT = FXCollections.observableArrayList();
-					subT.addAll(subTeachers);
-					subS.addAll(subStudents);
+					ObservableList<String> users = FXCollections.observableArrayList();
 
+//					subT.addAll(subTeachers);
+//					subS.addAll(subStudents);
+					// COLLECTION USERS//
+					collectionUsers = database.getCollection("users");
+					FindIterable<Document> fu = collectionUsers.find();
+					MongoCursor<Document> cursorUsers = collectionUsers.find().iterator();
+
+					Gson gson = new Gson();
+
+					for (Document docU : fu) {
+						String usersName = (String) docU.get("first_name");
+						Integer idUser = (Integer) docU.get("ID");
+						userId.put(usersName, idUser);
+						users.add(usersName);
+						((Collection) subTeachers).forEach(id -> {
+							if (id == docU.get("ID")) {
+								subT.add(usersName);
+								users.remove(usersName);
+
+							}
+						});
+						((Collection) subStudents).forEach(id -> {
+							if (id == docU.get("ID")) {
+								subS.add(usersName);
+								users.remove(usersName);
+
+							}
+						});
+
+						String docJ = docU.toJson();
+						array.add((JsonObject) new JsonParser().parse(docJ));
+
+						// Afegir profesor llista
+						btnAfegirProf.setOnAction(new EventHandler<ActionEvent>() {
+							public void handle(ActionEvent arg0) {
+								String teach = listUsuaris.getSelectionModel().getSelectedItem();
+								try (MongoClient mongoClient = MongoClients.create(uri)) {
+
+									database = mongoClient.getDatabase("ClassVRroom");
+									collectionCourses = database.getCollection("courses");
+									try {
+
+										List<Integer> teachers = new ArrayList<>();
+										userId.forEach((k, v) -> {
+											if (k.equals(teach)) {
+												teachers.add((Integer) v);
+												collectionCourses.updateOne(Filters.eq("title", currentC),
+														Updates.push("subscribers.teachers", v));
+
+											}
+										});
+
+									} catch (MongoException me) {
+										System.err
+												.println("An error occurred while attempting to run a command: " + me);
+									}
+								}
+
+								listProfessorsCurs.getItems().addAll(teach);
+								listUsuaris.getItems().remove(teach);
+								userId.forEach((k, v) -> {
+									if (k.equals(teach)) {
+										System.out.println(currentC + " dentro " + k + " " + v);
+
+									}
+								});
+
+							}
+						});
+						// eliminar profesor llista
+						btnEliminarProf.setOnAction(new EventHandler<ActionEvent>() {
+							public void handle(ActionEvent arg0) {
+								String teach = listProfessorsCurs.getSelectionModel().getSelectedItem();
+								try (MongoClient mongoClient = MongoClients.create(uri)) {
+
+									database = mongoClient.getDatabase("ClassVRroom");
+									collectionCourses = database.getCollection("courses");
+									try {
+
+										List<Integer> teachers = new ArrayList<>();
+										userId.forEach((k, v) -> {
+											if (k.equals(teach)) {
+												teachers.add((Integer) v);
+												collectionCourses.updateOne(Filters.eq("title", currentC),
+														Updates.pull("subscribers.teachers", v));
+
+											}
+										});
+
+									} catch (MongoException me) {
+										System.err
+												.println("An error occurred while attempting to run a command: " + me);
+									}
+								}
+								listUsuaris.getItems().addAll(teach);
+								listProfessorsCurs.getItems().remove(teach);
+							}
+						});
+						// Afegir alumne llista
+						btnAfegirAlumne.setOnAction(new EventHandler<ActionEvent>() {
+							public void handle(ActionEvent arg0) {
+								String student = listUsuaris.getSelectionModel().getSelectedItem();
+								try (MongoClient mongoClient = MongoClients.create(uri)) {
+
+									database = mongoClient.getDatabase("ClassVRroom");
+									collectionCourses = database.getCollection("courses");
+									try {
+
+										List<Integer> students = new ArrayList<>();
+										userId.forEach((k, v) -> {
+											if (k.equals(student)) {
+												collectionCourses.updateOne(Filters.eq("title", currentC),
+														Updates.push("subscribers.students", v));
+
+											}
+										});
+
+									} catch (MongoException me) {
+										System.err
+												.println("An error occurred while attempting to run a command: " + me);
+									}
+								}
+								listAlumnesCurs.getItems().addAll(student);
+								listUsuaris.getItems().remove(student);
+
+							}
+						});
+						// Eliminar alumne llista
+						btnEliminarAlumne.setOnAction(new EventHandler<ActionEvent>() {
+							public void handle(ActionEvent arg0) {
+								String student = listAlumnesCurs.getSelectionModel().getSelectedItem();
+								try (MongoClient mongoClient = MongoClients.create(uri)) {
+
+									database = mongoClient.getDatabase("ClassVRroom");
+									collectionCourses = database.getCollection("courses");
+									try {
+
+										List<Integer> students = new ArrayList<>();
+										userId.forEach((k, v) -> {
+											if (k.equals(student)) {
+												students.add((Integer) v);
+												collectionCourses.updateOne(Filters.eq("title", currentC),
+														Updates.pull("subscribers.students", v));
+
+											}
+										});
+
+									} catch (MongoException me) {
+										System.err
+												.println("An error occurred while attempting to run a command: " + me);
+									}
+								}
+								listUsuaris.getItems().addAll(student);
+								listAlumnesCurs.getItems().remove(student);
+
+							}
+						});
+
+					}
 					lTitulo = new Label();
 					lTitulo.setText(title);
 
@@ -177,162 +336,11 @@ public class loginWindow_Controller extends Application {
 						currentC = doc.get("title").toString();
 						listProfessorsCurs.setItems(subT);
 						listAlumnesCurs.setItems(subS);
+						listUsuaris.setItems(users);
 
-					});
-
-					btnEliminarAlumne.setOnAction(new EventHandler<ActionEvent>() {
-						public void handle(ActionEvent arg0) {
-							// collectionCourses.find(Filters.eq("ID",
-							// listAlumnesCurs.getSelectionModel().getSelectedItem()));
-							Document query = new Document().append("title", lTitulo.getText());
-							System.out.println(listAlumnesCurs.getSelectionModel().getSelectedItem());
-							// Bson updates = Updates.pull("subscribers.students",
-							// listAlumnesCurs.getSelectionModel().getSelectedItem().toString());
-							// UpdateResult result = collectionCourses.updateOne(query, updates);
-						}
 					});
 
 					x++;
-				}
-
-				// COLLECTION USERS//
-				collectionUsers = database.getCollection("users");
-				FindIterable<Document> fu = collectionUsers.find();
-				MongoCursor<Document> cursorUsers = collectionUsers.find().iterator();
-
-				Gson gson = new Gson();
-
-				for (Document docU : fu) {
-					String usersName = (String) docU.get("first_name");
-					Integer idUser = (Integer) docU.get("ID");
-					userId.put(usersName, idUser);
-					listUsuaris.getItems().addAll(usersName.toString());
-
-					String docJ = docU.toJson();
-					array.add((JsonObject) new JsonParser().parse(docJ));
-
-					// Afegir profesor llista
-					btnAfegirProf.setOnAction(new EventHandler<ActionEvent>() {
-						public void handle(ActionEvent arg0) {
-							String teach = listUsuaris.getSelectionModel().getSelectedItem();
-							try (MongoClient mongoClient = MongoClients.create(uri)) {
-
-								database = mongoClient.getDatabase("ClassVRroom");
-								collectionCourses = database.getCollection("courses");
-								try {
-
-									List<Integer> teachers = new ArrayList<>();
-									userId.forEach((k, v) -> {
-										if (k.equals(teach)) {
-											teachers.add((Integer) v);
-											collectionCourses.updateOne(Filters.eq("title", currentC),
-													Updates.push("subscribers.teachers", v));
-
-										}
-									});
-
-								} catch (MongoException me) {
-									System.err.println("An error occurred while attempting to run a command: " + me);
-								}
-							}
-
-							listProfessorsCurs.getItems().addAll(teach);
-							listUsuaris.getItems().remove(teach);
-							userId.forEach((k, v) -> {
-								if (k.equals(teach)) {
-									System.out.println(currentC + " dentro " + k + " " + v);
-
-								}
-							});
-
-						}
-					});
-					// eliminar profesor llista
-					btnEliminarProf.setOnAction(new EventHandler<ActionEvent>() {
-						public void handle(ActionEvent arg0) {
-							String teach = listProfessorsCurs.getSelectionModel().getSelectedItem();
-							try (MongoClient mongoClient = MongoClients.create(uri)) {
-
-								database = mongoClient.getDatabase("ClassVRroom");
-								collectionCourses = database.getCollection("courses");
-								try {
-
-									List<Integer> teachers = new ArrayList<>();
-									userId.forEach((k, v) -> {
-										if (k.equals(teach)) {
-											teachers.add((Integer) v);
-											collectionCourses.updateOne(Filters.eq("title", "Curso 1"),
-													Updates.pull("subscribers.teachers", v));
-
-										}
-									});
-
-								} catch (MongoException me) {
-									System.err.println("An error occurred while attempting to run a command: " + me);
-								}
-							}
-							listUsuaris.getItems().addAll(teach);
-							listProfessorsCurs.getItems().remove(teach);
-						}
-					});
-					// Afegir alumne llista
-					btnAfegirAlumne.setOnAction(new EventHandler<ActionEvent>() {
-						public void handle(ActionEvent arg0) {
-							String student = listUsuaris.getSelectionModel().getSelectedItem();
-							try (MongoClient mongoClient = MongoClients.create(uri)) {
-
-								database = mongoClient.getDatabase("ClassVRroom");
-								collectionCourses = database.getCollection("courses");
-								try {
-
-									List<Integer> students = new ArrayList<>();
-									userId.forEach((k, v) -> {
-										if (k.equals(student)) {
-											collectionCourses.updateOne(Filters.eq("title", "Curso 1"),
-													Updates.push("subscribers.students", v));
-
-										}
-									});
-
-								} catch (MongoException me) {
-									System.err.println("An error occurred while attempting to run a command: " + me);
-								}
-							}
-							listAlumnesCurs.getItems().addAll(student);
-							listUsuaris.getItems().remove(student);
-
-						}
-					});
-					// Eliminar alumne llista
-					btnEliminarAlumne.setOnAction(new EventHandler<ActionEvent>() {
-						public void handle(ActionEvent arg0) {
-							String student = listAlumnesCurs.getSelectionModel().getSelectedItem();
-							try (MongoClient mongoClient = MongoClients.create(uri)) {
-
-								database = mongoClient.getDatabase("ClassVRroom");
-								collectionCourses = database.getCollection("courses");
-								try {
-
-									List<Integer> students = new ArrayList<>();
-									userId.forEach((k, v) -> {
-										if (k.equals(student)) {
-											students.add((Integer) v);
-											collectionCourses.updateOne(Filters.eq("title", "Curso 1"),
-													Updates.pull("subscribers.students", v));
-
-										}
-									});
-
-								} catch (MongoException me) {
-									System.err.println("An error occurred while attempting to run a command: " + me);
-								}
-							}
-							listUsuaris.getItems().addAll(student);
-							listAlumnesCurs.getItems().remove(student);
-
-						}
-					});
-
 				}
 
 			} catch (MongoException me) {
